@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="This is a voice triggered photo album project using AWS">
+  <meta name="author" content="Jin Gyu Lee & Benjamin Teo">
+
+  <title>Voice triggered photo album</title>
+
+  <!-- api gateway generated sdk -->
+  <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+  <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.878.0.min.js"></script>
+  <script type="text/javascript" src="apigClient.js"></script>
+
+  <!-- AJAX -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <div id='upload' class='upload_picture'>
+    <p>Upload your picture to the album!</p>
+    <input type="file" class='choose_file' onchange="ViewFile(this);" accept="image/*" id='file_path'
+      name='upload_file'><br><br>
+    <button class='upload_button' onclick="UploadFile()">Upload!</button><br>
+  </div><br>
+  <h3 id="answer1" style="color: green;"></h3>
+
+  <br><br>
+  <hr>
+  <div id='search' class='search_picture'>
+    <p>Find your pictures using text or voice!! Kore</p>
+    <input id='searcher' class='choose-file' type='text' placeholder="Search"></input><br><br>
+    <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
+    <button class='search_button_voice' onclick=VoiceSearch()>Start Voice to search</button>
+  </div>
+  <h3 id="answer2" style="color: green;"></h3>
+  <h2 id="answer5" style="color: blue;"></h2><br>
+  <h2 id="answer6" style="color: red;"></h2>
+
+  <div class="banner" id='img-container'>
+    <p id="displaytext"></p>
+  </div>
+
+</body>
+
+<script>
+  var name = '';
+  var encoded = null;
+  var fileExt = null;
+  window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+  const synth = window.speechSynthesis;
+  const recognition = new SpeechRecognition();
+  var apigClient = apigClientFactory.newClient();
+  // var apigClient = apigClientFactory.newClient({
+  //   apiKey: 'API_KEY'
+  // });
+  // var apigClient = apigClientFactory.newClient({
+  //   invokeUrl:'https://xxxxx.execute-api.us-east-1.amazonaws.com', // REQUIRED
+  //   apiKey: 'API_KEY', // REQUIRED
+  //   region: 'eu-west-1' // REQUIRED
+  // });
+
+  // Encode picture to base 64_______________________________
+  function ViewFile(input) {
+    var reader = new FileReader()
+    name = input.files[0].name
+    console.log(name)
+    file = input.files[0]
+    fileExt = name.split(".").pop()
+    var onlyname = name.replace(/\.[^/.]+$/, "")
+    var finalName = onlyname + "_" + Date.now() + "." + fileExt
+    name = finalName;
+
+    reader.onload = function (e) {
+      var src = e.target.result
+      var newImage = document.createElement("img")
+      newImage.src = src
+      encoded = newImage.outerHTML
+    }
+    reader.readAsDataURL(input.files[0])
+  }
+
+
+  // Upload Base64 image to S3 through API________________________________
+  function UploadFile() {
+    var filePath = document.getElementById('file_path').value //C:\fakepath\me.png
+    var file = document.getElementById('file_path').files[0]
+    var reader = new FileReader()
+    document.getElementById('file_path').value = ""
+    if ((filePath == "") || (!['png', 'jpg', 'jpeg'].includes(filePath.split(".")[1]))) {
+      alert("Please upload a valid PNG/JPG file")
+    } else {
+      var params = {
+        bucket: 'photophotobucket',
+        key: filePath.split("\\").slice(-1)[0], // "me.png"
+        'Content-Type': file.type
+      };
+      var body = {}
+      var additionalParams = {
+        headers: {
+          'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS'
+        },
+        queryParams: {}
+      };
+      reader.onload = function (event) {
+        body = btoa(event.target.result)
+        console.log("body")
+        console.log(body)
+        var whatToReturn = apigClient.uploadBucketKeyPut(params, body, additionalParams)
+          .then(function (result) {
+            console.log("not error")
+            console.log(result);
+          })
+          .catch(function (error) {
+            console.log("error")
+            console.log(error)
+          });
+        console.log("whatToReturn")
+        console.log(whatToReturn)
+        return whatToReturn
+      }
+      reader.readAsBinaryString(file)
+    }
+  }
+
+
+
+  function TextSearch() {
+    var searchTerm = document.getElementById("searcher").value;
+    console.log("DEBUG term", searchTerm);
+    $('#answer2').html("You are searching for: " + searchTerm).css("color", "green")
+    SendMessageBot(searchTerm)
+  }
+
+  function VoiceSearch() {
+    recognition.start();
+    recognition.onresult = (event) => {
+      const speechToText = event.results[0][0].transcript;
+      console.log(speechToText)
+      $('#answer2').html("You are searching for: " + speechToText).css("color", "green")
+      SendMessageBot(speechToText)
+    }
+  }
+
+  function SendMessageBot(term) {
+    var url = "URL______________________________________________________________"
+    payload = {
+      text: term,
+    };
+    $.ajax({
+      url: url,
+      method: "POST",
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(payload),
+      headers: {
+        'content-type': 'json'
+      },
+      success: function (msg) {
+        console.log("DEBUG:", JSON.stringify(msg))
+        responsedata = JSON.stringify(msg["body"]["keywords"])
+        imageurls = JSON.stringify(msg['body']['ids'])
+        console.log(imageurls)
+        $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
+
+        imageurls = imageurls.replace(/'/g, '"');
+        imageurls = JSON.parse(imageurls)
+        //Now display data
+
+        image_length = imageurls.length;
+        if (image_length == 0) {
+          $('#answer6').html("No image to RETURN!").css("color", "red");
+        }
+
+        imageurls.forEach(function (obj) {
+          var img = new Image();
+          img.src = obj;
+          img.setAttribute("class", "imgs");
+          img.setAttribute("alt", "image_not_shown");
+          document.getElementById("img-container").append(img);
+          document.getElementById("displaytext").style.display = "block";
+        });
+      }
+    })
+
+
+  }
+
+
+</script>
+<style>
+  .banner img {
+    margin: 5px;
+    height: 200px;
+    width: 275px;
+  }
+
+  .banner {
+    height: 500px;
+    overflow: auto;
+  }
+</style>
