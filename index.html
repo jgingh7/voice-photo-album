@@ -74,7 +74,6 @@
   function ViewFile(input) {
     var reader = new FileReader()
     name = input.files[0].name
-    console.log(name)
     file = input.files[0]
     fileExt = name.split(".").pop()
     var onlyname = name.replace(/\.[^/.]+$/, "")
@@ -102,37 +101,31 @@
     } else {
       var params = {
         bucket: 'photophotobucket',
-        key: filePath.split("\\").slice(-1)[0], // "me.png"
-        'Content-Type': file.type
+        key: filePath.split("\\").slice(-1)[0] // "me.png"
       };
       var body = {}
       var additionalParams = {
         headers: {
-          'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS'
+          'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS',
+          'Content-Type': file.type
         },
         queryParams: {}
       };
       reader.onload = function (event) {
         body = btoa(event.target.result)
-        console.log("body")
-        console.log(body)
-        var whatToReturn = apigClient.uploadBucketKeyPut(params, body, additionalParams)
+        return apigClient.uploadBucketKeyPut(params, body, additionalParams)
           .then(function (result) {
-            console.log("not error")
+            console.log("DEBUG: not error result")
             console.log(result);
           })
           .catch(function (error) {
-            console.log("error")
+            console.log("DEBUG: error result")
             console.log(error)
-          });
-        console.log("whatToReturn")
-        console.log(whatToReturn)
-        return whatToReturn
+          })
       }
       reader.readAsBinaryString(file)
     }
   }
-
 
 
   function TextSearch() {
