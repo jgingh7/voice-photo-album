@@ -6,74 +6,85 @@ import requests
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
-client = boto3.client('lex-runtime')
+lex_client = boto3.client('lex-runtime')
 
+credentials = boto3.Session().get_credentials()
+region = 'us-east-1'
+service = 'es'
+awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
 def lambda_handler(event, context):
     # Get Keyword from Lex________________________________________________________________________
-    print(event)
-    user_message = event['text']
+    print("DEBUG: event:", event)
+    user_message = event['queryStringParameters']['q']
 
     if user_message == None:
         return{
             'statusCode': 200,
+            'headers': { 
+                'Access-Control-Allow-Headers' : 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+            },
             'body':json.dumps("No Message!")
         }
     
-    response = client.post_text(
-        botName='imagefind',
-        botAlias='imagetexter',
-        userId= 'userId',
-        inputText= user_message
+    response = lex_client.post_text(
+        botName ='chatBotTwo',
+        botAlias ='chatBotTwoAlias',
+        userId = event['requestContext']['accountId'],
+        inputText = user_message
     )
+    print("DEBUG: response:", response)
     returnlist = []
-    returnid=[]
-    response2 = response['message']
-    keywords = ['dog', 'cat', 'human', 'horse','fish','city','car','bus', 'elephant','bird','park','tree','building','truck','bear','flower','plant','computer','water','fire','monkey']
+    response_message = response['message']
+    keywords = ['dog','cat','human','person','horse','fish','city','car','bus','elephant','bird','park','tree','building','truck','bear',\
+    'flower','plant','computer','water','fire','monkey','smile','angry','face','shirt','clothing','apparel']
     
-    for i in keywords:
-        if i in response2:
-            returnlist.append(i)
+    for keyword in keywords:
+        if keyword in response_message:
+            returnlist.append(keyword)
 
-    print("DEBUG return list:", returnlist)
+    print("DEBUG: return list:", returnlist)
     
     #Look for elastic search and return list. FETCH the key__________________________
-    host = 'URL__________' # For example, my-test-domain.us-east-1.es.amazonaws.com
-    region = 'us-east-1' # e.g. us-west-1
-    
-    service = 'es'
-    credentials = boto3.Session().get_credentials()
-    awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
-    
+    es_endpoint = 'search-photos-jsltvsfmvvax7uaa4vw2zzp7ii.us-east-1.es.amazonaws.com'
     es = Elasticsearch(
-        hosts = [{'host': host, 'port': 443}],
+        hosts = [{'host': es_endpoint, 'port': 443}],
         http_auth = awsauth,
         use_ssl = True,
         verify_certs = True,
         connection_class = RequestsHttpConnection
     )
     
-    return_ids = es.search(index="images", body={
-    "query":{
-        'terms':{
-            'labels':returnlist
-        }
-    }
-    })
+    return_ids = es.search(index = "images", body = {
+        "query":{
+            'terms':{
+                'labels': returnlist
+            }}})
     
-    tempp=return_ids['hits']['hits']
+    print("DEBUG: return ids", return_ids)
+    tempp = return_ids['hits']['hits']
+    print("DEBUG: tempp", tempp)
+
     
+    returnid = []
     for temp in tempp:
-        print(temp['_source']['ObjectKey'])
+        print("DEBUG: temp source objectkey", temp['_source']['ObjectKey'])
         returnid.append("URL__________/"+str(temp['_source']['ObjectKey']))
     print("DEBUG: return list", returnlist)
     print("DEBUG: return id", returnid)
     returnvals = {
-        'keywords':returnlist,
-        'ids':returnid
+        'keywords': returnlist,
+        'ids': returnid
     }
     
     return {
         'statusCode': 200,
+        'headers': { 
+            'Access-Control-Allow-Headers' : 'Content-Type',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,GET'
+        },
         'body': returnvals
     }

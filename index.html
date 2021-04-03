@@ -22,7 +22,7 @@
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.878.0.min.js"></script>
   <script type="text/javascript" src="apigClient.js"></script>
 
-  <!-- AJAX -->
+  <!-- AJAX MAY NOT NEED THIS!-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 
@@ -38,11 +38,13 @@
   <br><br>
   <hr>
   <div id='search' class='search_picture'>
-    <p>Find your pictures using text or voice!! Kore</p>
+    <p>Find your pictures using text or voice!!</p>
     <input id='searcher' class='choose-file' type='text' placeholder="Search"></input><br><br>
     <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
     <button class='search_button_voice' onclick=VoiceSearch()>Start Voice to search</button>
   </div>
+  <div id="output-box">
+
   <h3 id="answer2" style="color: green;"></h3>
   <h2 id="answer5" style="color: blue;"></h2><br>
   <h2 id="answer6" style="color: red;"></h2>
@@ -61,7 +63,7 @@
   const synth = window.speechSynthesis;
   const recognition = new SpeechRecognition();
   var apigClient = apigClientFactory.newClient();
-  // var apigClient = apigClientFactory.newClient({
+  // var apigClient = apigClientFactory.newClient({// SEE IF I CAN USE THIS
   //   apiKey: 'API_KEY'
   // });
   // var apigClient = apigClientFactory.newClient({
@@ -74,7 +76,6 @@
   function ViewFile(input) {
     var reader = new FileReader()
     name = input.files[0].name
-    file = input.files[0]
     fileExt = name.split(".").pop()
     var onlyname = name.replace(/\.[^/.]+$/, "")
     var finalName = onlyname + "_" + Date.now() + "." + fileExt
@@ -96,7 +97,7 @@
     var file = document.getElementById('file_path').files[0]
     var reader = new FileReader()
     document.getElementById('file_path').value = ""
-    if ((filePath == "") || (!['png', 'jpg', 'jpeg'].includes(filePath.split(".")[1]))) {
+    if ((filePath == "") || (!['png', 'jpg', 'jpeg'].includes(fileExt))) {
       alert("Please upload a valid PNG/JPG file")
     } else {
       var params = {
@@ -108,86 +109,126 @@
         headers: {
           'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS',
           'Content-Type': file.type
-        },
-        queryParams: {}
-      };
+        }
+      }
       reader.onload = function (event) {
         body = btoa(event.target.result)
         return apigClient.uploadBucketKeyPut(params, body, additionalParams)
           .then(function (result) {
             console.log("DEBUG: not error result")
-            console.log(result);
+            console.log(result)
+            alert("Successfully uploaded the image!")
           })
           .catch(function (error) {
             console.log("DEBUG: error result")
             console.log(error)
+            alert("Something went Wrong!")
           })
       }
-      reader.readAsBinaryString(file)
+      reader.readAsBinaryString(file) // CANNOT REMOVE THIS WHY?
     }
   }
 
 
   function TextSearch() {
-    var searchTerm = document.getElementById("searcher").value;
-    console.log("DEBUG term", searchTerm);
-    $('#answer2').html("You are searching for: " + searchTerm).css("color", "green")
-    SendMessageBot(searchTerm)
-  }
-
-  function VoiceSearch() {
-    recognition.start();
-    recognition.onresult = (event) => {
-      const speechToText = event.results[0][0].transcript;
-      console.log(speechToText)
-      $('#answer2').html("You are searching for: " + speechToText).css("color", "green")
-      SendMessageBot(speechToText)
+    var searchTerm = document.getElementById("searcher").value.trim().toLowerCase()
+    console.log("DEBUG searchTerm:", searchTerm) //string of what I typed in
+    if (searchTerm == "") {
+      alert("Please enter valid text");
+    } else {
+      $('#answer2').html("You are searching for: " + searchTerm).css("color", "green")
+      SendMessageBot(searchTerm)
     }
   }
 
-  function SendMessageBot(term) {
-    var url = "URL______________________________________________________________"
-    payload = {
-      text: term,
-    };
-    $.ajax({
-      url: url,
-      method: "POST",
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify(payload),
+  // function VoiceSearch() {
+  //   recognition.start();
+  //   recognition.onresult = (event) => {
+  //     const speechToText = event.results[0][0].transcript;
+  //     console.log(speechToText)
+  //     $('#answer2').html("You are searching for: " + speechToText).css("color", "green")
+  //     SendMessageBot(speechToText)
+  //   }
+  // }
+
+  function SendMessageBot(searchTerm) {
+    document.getElementById('output-box').innerHTML = "" //need to see what to do with this // this is where the output pops up
+    document.getElementById('searcher').value = searchTerm // putting the trim lowercase in the value
+    var searchResults = []
+    var params = {
+      'q': searchTerm
+    }
+    var body = {}
+    var additionalParams = {
       headers: {
-        'content-type': 'json'
+        'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS'
       },
-      success: function (msg) {
-        console.log("DEBUG:", JSON.stringify(msg))
-        responsedata = JSON.stringify(msg["body"]["keywords"])
-        imageurls = JSON.stringify(msg['body']['ids'])
-        console.log(imageurls)
-        $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
-
-        imageurls = imageurls.replace(/'/g, '"');
-        imageurls = JSON.parse(imageurls)
-        //Now display data
-
-        image_length = imageurls.length;
-        if (image_length == 0) {
-          $('#answer6').html("No image to RETURN!").css("color", "red");
+      queryParams: {}
+    }
+    return apigClient.searchGet(params, body, additionalParams)
+      .then(function (result) {
+        console.log("result")
+        console.log(result)
+        console.log("result.data.body")
+        console.log(result.data.body)
+        result.data.body.forEach((element) => {
+          searchResults.push(element._source.objectKey)
+        })
+        searchResults.forEach((element) => {
+          document.getElementById('output-box').innerHTML += "<img src=\"https://s3.amazonaws.com/photophotobucket/" + element + "\" width=\"50%\" height=\"50%\" style=\"border-radius: 10px\">";        })
+        if (searchResults.length == 0) {
+          document.getElementById('output-box').innerHTML = "<p align=\"center\"><STRONG>NO SEARCH RESULTS FOUND</STRONG></p>";
         }
-
-        imageurls.forEach(function (obj) {
-          var img = new Image();
-          img.src = obj;
-          img.setAttribute("class", "imgs");
-          img.setAttribute("alt", "image_not_shown");
-          document.getElementById("img-container").append(img);
-          document.getElementById("displaytext").style.display = "block";
-        });
-      }
-    })
-
-
+      })
+      .catch(function (error) {
+        console.log("DEBUG: error result")
+        console.log(error)
+        // alert("Something went Wrong!")
+      })
   }
+
+
+  // function SendMessageBot(term) {
+  //   var url = "URL______________________________________________________________"
+  //   payload = {
+  //     text: term,
+  //   };
+  //   $.ajax({
+  //     url: url,
+  //     method: "POST",
+  //     dataType: 'json',
+  //     contentType: 'application/json',
+  //     data: JSON.stringify(payload),
+  //     headers: {
+  //       'content-type': 'json'
+  //     },
+  //     success: function (msg) {
+  //       console.log("DEBUG:", JSON.stringify(msg))
+  //       responsedata = JSON.stringify(msg["body"]["keywords"])
+  //       imageurls = JSON.stringify(msg['body']['ids'])
+  //       console.log(imageurls)
+  //       $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
+
+  //       imageurls = imageurls.replace(/'/g, '"');
+  //       imageurls = JSON.parse(imageurls)
+  //       //Now display data
+
+  //       image_length = imageurls.length;
+  //       if (image_length == 0) {
+  //         $('#answer6').html("No image to RETURN!").css("color", "red");
+  //       }
+
+  //       imageurls.forEach(function (obj) {
+  //         var img = new Image();
+  //         img.src = obj;
+  //         img.setAttribute("class", "imgs");
+  //         img.setAttribute("alt", "image_not_shown");
+  //         document.getElementById("img-container").append(img);
+  //         document.getElementById("displaytext").style.display = "block";
+  //       });
+  //     }
+  //   })
+  // }
 
 
 </script>
