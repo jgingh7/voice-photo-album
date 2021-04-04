@@ -43,12 +43,11 @@
     <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
     <button class='search_button_voice' onclick=VoiceSearch()>Start Voice to search</button>
   </div>
+
+  <h3 id="answer2" style="color: green;"></h3>
+  <h2 id="answer5" style="color: blue;"></h2><br>
+  <h2 id="answer6" style="color: red;"></h2>
   <div id="output-box">
-
-    <h3 id="answer2" style="color: green;"></h3>
-    <h2 id="answer5" style="color: blue;"></h2><br>
-    <h2 id="answer6" style="color: red;"></h2>
-
     <div class="banner" id='img-container'>
       <p id="displaytext"></p>
     </div>
@@ -179,7 +178,7 @@
       .catch(function (error) {
         console.log("DEBUG: error result")
         console.log(error)
-        // alert("Something went Wrong!")
+        alert("Something went Wrong!")
       })
   }
 

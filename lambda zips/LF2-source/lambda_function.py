@@ -36,6 +36,22 @@ def lambda_handler(event, context):
         inputText = user_message
     )
     print("DEBUG: response:", response)
+    
+    if response['dialogState'] == 'ElicitIntent':
+        return {
+            'statusCode': 200,
+            'headers': { 
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+            },
+            'body': json.dumps({
+                "results": {
+                    'keywords': [],
+                    'ids': []
+                }
+            })
+        }
+    
     returnlist = []
     response_message = [response['slots']['imageA']] #this just returns 1
     if response['slots']['imageB']:
