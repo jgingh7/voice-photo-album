@@ -37,10 +37,21 @@ def lambda_handler(event, context):
     )
     print("DEBUG: response:", response)
     returnlist = []
-    response_message = response['message']
+    response_message = [response['slots']['imageA']] #this just returns 1
+    if response['slots']['imageB']:
+        response_message.append(response['slots']['imageB'])
+    if response['slots']['imageC']:
+        response_message.append(response['slots']['imageC'])
+    if response['slots']['imageD']:
+        response_message.append(response['slots']['imageD'])
+    if response['slots']['imageE']:
+        response_message.append(response['slots']['imageE'])
+    
+    
     keywords = ['dog','cat','human','person','horse','fish','city','car','bus','elephant','bird','park','tree','building','truck','bear',\
     'flower','plant','computer','water','fire','monkey','smile','angry','face','shirt','clothing','apparel']
     
+    # this can be deleted
     for keyword in keywords:
         if keyword in response_message:
             returnlist.append(keyword)
@@ -69,11 +80,13 @@ def lambda_handler(event, context):
 
     
     returnid = []
+    bucket = "photophotobucket"
     for temp in tempp:
-        print("DEBUG: temp source objectkey", temp['_source']['ObjectKey'])
-        returnid.append("URL__________/"+str(temp['_source']['ObjectKey']))
-    print("DEBUG: return list", returnlist)
-    print("DEBUG: return id", returnid)
+        print("DEBUG: temp source objectkey", temp['_source']['ObjectKey']) #me.png #jin-profile.png
+        returnid.append(f"https://{bucket}.s3.amazonaws.com/{str(temp['_source']['ObjectKey'])}")
+        # returnid.append(f"https://s3.amazonaws.com/{bucket}/{str(temp['_source']['ObjectKey'])}")
+    print("DEBUG: return list", returnlist) #['human']
+    print("DEBUG: return id", returnid) #['https://s3.amazonaws.com/photophotobucket/me.png', 'https://s3.amazonaws.com/photophotobucket/jin-profile.png']
     returnvals = {
         'keywords': returnlist,
         'ids': returnid
@@ -82,9 +95,21 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': { 
-            'Access-Control-Allow-Headers' : 'Content-Type',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,GET'
         },
-        'body': returnvals
+        'body': json.dumps({
+            "results": returnvals
+        })
     }
+#     {
+#     "results": {
+#         "keywords": [
+#             "human"
+#         ],
+#         "ids": [
+#             "https://s3.amazonaws.com/photophotobucket/me.png",
+#             "https://s3.amazonaws.com/photophotobucket/jin-profile.png"
+#         ]
+#     }
+# }
