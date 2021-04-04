@@ -38,7 +38,7 @@
   <br><br>
   <hr>
   <div id='search' class='search_picture'>
-    <p>Find your pictures using text or voice!!</p>
+    <p>Find your pictures using text or voice!! (you may search up to 5 terms)</p>
     <input id='searcher' class='choose-file' type='text' placeholder="Search"></input><br><br>
     <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
     <button class='search_button_voice' onclick=VoiceSearch()>Start Voice to search</button>
@@ -169,15 +169,18 @@
       .then(function (result) {
         console.log("result")
         console.log(result)
-        console.log("result.data.body")
-        console.log(result.data.body)
-        result.data.body.forEach((element) => {
-          searchResults.push(element._source.objectKey)
+        console.log("result.data.results")
+        console.log(result.data.results.ids)
+        result.data.results.ids.forEach((element) => {
+          searchResults.push(element)
         })
         searchResults.forEach((element) => {
-          document.getElementById('output-box').innerHTML += "<img src=\"https://s3.amazonaws.com/photophotobucket/" + element + "\" width=\"50%\" height=\"50%\" style=\"border-radius: 10px\">";        })
+          var imageHTML = "<img src=\"" + element + "\" width=\"50%\" height=\"50%\" style=\"border-radius: 10px\">"
+          console.log(imageHTML)
+          document.getElementById('output-box').innerHTML += imageHTML
+        })
         if (searchResults.length == 0) {
-          document.getElementById('output-box').innerHTML = "<p align=\"center\"><STRONG>NO SEARCH RESULTS FOUND</STRONG></p>";
+          document.getElementById('output-box').innerHTML = "<p align=\"center\"><STRONG>NO SEARCH RESULTS FOUND</STRONG></p>"
         }
       })
       .catch(function (error) {
