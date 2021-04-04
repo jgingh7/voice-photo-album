@@ -48,30 +48,20 @@
   <h2 id="answer5" style="color: blue;"></h2><br>
   <h2 id="answer6" style="color: red;"></h2>
   <div id="output-box">
-    <div class="banner" id='img-container'>
-      <p id="displaytext"></p>
-    </div>
 
 </body>
 
 <script>
-  var name = '';
-  var encoded = null;
-  var fileExt = null;
-  window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-  const synth = window.speechSynthesis;
-  const recognition = new SpeechRecognition();
-  var apigClient = apigClientFactory.newClient();
-  // var apigClient = apigClientFactory.newClient({// SEE IF I CAN USE THIS
-  //   apiKey: 'API_KEY'
-  // });
-  // var apigClient = apigClientFactory.newClient({
-  //   invokeUrl:'https://xxxxx.execute-api.us-east-1.amazonaws.com', // REQUIRED
-  //   apiKey: 'API_KEY', // REQUIRED
-  //   region: 'eu-west-1' // REQUIRED
-  // });
+  var name = ''
+  var encoded = null
+  var fileExt = null
+  window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
+  const synth = window.speechSynthesis
+  const recognition = new SpeechRecognition()
+  var apigClient = apigClientFactory.newClient()
 
-  // Encode picture to base 64_______________________________
+
+  // Encode picture to base 64_________SEE IF I NEED TO ENCODE
   function ViewFile(input) {
     var reader = new FileReader()
     name = input.files[0].name
@@ -90,7 +80,6 @@
   }
 
 
-  // Upload Base64 image to S3 through API________________________________
   function UploadFile() {
     var filePath = document.getElementById('file_path').value //C:\fakepath\me.png
     var file = document.getElementById('file_path').files[0]
@@ -133,15 +122,15 @@
     }
   }
 
-  // function VoiceSearch() {
-  //   recognition.start();
-  //   recognition.onresult = (event) => {
-  //     const speechToText = event.results[0][0].transcript;
-  //     console.log(speechToText)
-  //     $('#answer2').html("You are searching for: " + speechToText).css("color", "green")
-  //     SendMessageBot(speechToText)
-  //   }
-  // }
+  function VoiceSearch() {
+    recognition.start();
+    recognition.onresult = (event) => {
+      const speechToText = event.results[0][0].transcript;
+      console.log(speechToText)
+      $('#answer2').html("You are searching for: " + speechToText).css("color", "green")
+      SendMessageBot(speechToText)
+    }
+  }
 
   function SendMessageBot(searchTerm) {
     document.getElementById('output-box').innerHTML = "" //need to see what to do with this // this is where the output pops up
@@ -154,15 +143,14 @@
     var additionalParams = {
       headers: {
         'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS'
-      },
-      queryParams: {}
+      }
     }
+
     return apigClient.searchGet(params, body, additionalParams)
       .then(function (result) {
-        console.log("result")
-        console.log(result)
-        console.log("result.data.results")
-        console.log(result.data.results.ids)
+        var responsedata = result.data.results.keywords.join(', ')
+        $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
+
         result.data.results.ids.forEach((element) => {
           searchResults.push(element)
         })
@@ -172,7 +160,7 @@
           document.getElementById('output-box').innerHTML += imageHTML
         })
         if (searchResults.length == 0) {
-          document.getElementById('output-box').innerHTML = "<p align=\"center\"><STRONG>NO SEARCH RESULTS FOUND</STRONG></p>"
+          $('#answer6').html("No image to RETURN!").css("color", "red")
         }
       })
       .catch(function (error) {
@@ -183,59 +171,4 @@
   }
 
 
-  // function SendMessageBot(term) {
-  //   var url = "URL______________________________________________________________"
-  //   payload = {
-  //     text: term,
-  //   };
-  //   $.ajax({
-  //     url: url,
-  //     method: "POST",
-  //     dataType: 'json',
-  //     contentType: 'application/json',
-  //     data: JSON.stringify(payload),
-  //     headers: {
-  //       'content-type': 'json'
-  //     },
-  //     success: function (msg) {
-  //       console.log("DEBUG:", JSON.stringify(msg))
-  //       responsedata = JSON.stringify(msg["body"]["keywords"])
-  //       imageurls = JSON.stringify(msg['body']['ids'])
-  //       console.log(imageurls)
-  //       $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
-
-  //       imageurls = imageurls.replace(/'/g, '"');
-  //       imageurls = JSON.parse(imageurls)
-  //       //Now display data
-
-  //       image_length = imageurls.length;
-  //       if (image_length == 0) {
-  //         $('#answer6').html("No image to RETURN!").css("color", "red");
-  //       }
-
-  //       imageurls.forEach(function (obj) {
-  //         var img = new Image();
-  //         img.src = obj;
-  //         img.setAttribute("class", "imgs");
-  //         img.setAttribute("alt", "image_not_shown");
-  //         document.getElementById("img-container").append(img);
-  //         document.getElementById("displaytext").style.display = "block";
-  //       });
-  //     }
-  //   })
-  // }
-
-
 </script>
-<style>
-  .banner img {
-    margin: 5px;
-    height: 200px;
-    width: 275px;
-  }
-
-  .banner {
-    height: 500px;
-    overflow: auto;
-  }
-</style>
