@@ -8,6 +8,9 @@
 
   <title>Voice triggered photo album</title>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+  <link rel="stylesheet" href="https://cdn.shoelace.style/1.0.0-beta24/shoelace.css">
+
   <!-- api gateway generated sdk -->
   <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
   <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
@@ -25,7 +28,6 @@
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
     crossorigin="anonymous"></script>
-  <script data-main="scripts/main.js" src="scripts/require.js"></script>
 </head>
 
 <body>
@@ -47,18 +49,63 @@
     <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
   </div>
 
-  <textarea id="transcript" placeholder="Press Start and speak into your mic" rows="5" readonly="readonly"></textarea>
-  <div class="row">
-    <div class="col">
-      <button id="start-button" class="button-xl" title="Start Transcription">
-        <i class="fa fa-microphone"></i> Start
-      </button>
-      <button id="stop-button" class="button-xl" title="Stop Transcription" disabled="true"><i
-          class="fa fa-stop-circle"></i> Stop
-      </button>
-      <button id="reset-button" class="button-xl button-secondary" title="Clear Transcript">
-        Clear Transcript
-      </button>
+  <!-- <textarea id="transcript" placeholder="Press Start and speak into your mic" rows="5" readonly="readonly"></textarea> -->
+  <div class="container">
+
+    <div id="error" class="isa_error"></div>
+
+    <div class="row">
+      <div class="col">
+        <label>Access ID:</label>
+        <input type="password" id="access_id" placeholder="ACCESS ID" value="" />
+
+        <label>Secret Key:</label>
+        <input type="password" id="secret_key" placeholder="SECRET KEY" value="" />
+        <label>Session Token (if using MFA):</label>
+        <input type="password" id="session_token" placeholder="SESSION TOKEN" value="" />
+      </div>
+      <div class="col">
+        <label>Language: </label>
+        <select id="language">
+          <optgroup label="English">
+            <option value="en-US">US English (en-US)</option>
+            <option value="en-AU">Australian English (en-AU)</option>
+            <option value="en-GB">British English (en-GB)</option>
+          </optgroup>
+          <optgroup label="French">
+            <option value="fr-CA">Canadian French (fr-CA)</option>
+            <option value="fr-FR">French (fr-FR)</option>
+          </optgroup>
+          <optgroup label="Spanish">
+            <option value="es-US">US Spanish (es-US)</option>
+          </optgroup>
+        </select>
+
+        <label>Region:</label>
+        <select id="region">
+          <option value="us-east-1">US East (N. Virginia)</option>
+          <option value="us-east-2">US East (Ohio)</option>
+          <option value="us-west-2">US West (Oregon)</option>
+          <option value="ap-southeast-2">Asia Pacific (Sydney)</option>
+          <option value="ca-central-1">Canada (Central)</option>
+          <option value="eu-west-1">EU (Ireland)</option>
+        </select>
+      </div>
+    </div>
+    <textarea id="transcript" placeholder="Press Start and speak into your mic" rows="5" readonly="readonly"></textarea>
+    <div class="row">
+      <div class="col">
+        <button id="start-button" class="button-xl" title="Start Transcription">
+          <i class="fa fa-microphone"></i> Start
+        </button>
+        <button id="stop-button" class="button-xl" title="Stop Transcription" disabled="true"><i
+            class="fa fa-stop-circle"></i> Stop
+        </button>
+        <button id="reset-button" class="button-xl button-secondary" title="Clear Transcript">
+          Clear Transcript
+        </button>
+        <button id='search-voice-button' class="button-xl button-secondary" onclick=VoiceSearch()>Search</button><br><br>
+      </div>
     </div>
   </div>
 
@@ -70,5 +117,6 @@
 
 </body>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="scripts/index.js"></script>
-<script src="scripts/main.js"></script>
+<script src="dist/main.js"></script>
