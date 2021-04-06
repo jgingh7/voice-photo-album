@@ -37,7 +37,7 @@ function UploadFile() {
     var additionalParams = {
       headers: {
         'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS',
-        'Content-Type': file.type, 
+        'Content-Type': file.type
       },
       queryParams: {}
     };
@@ -55,38 +55,6 @@ function UploadFile() {
 }
 
 
-
-// function UploadFile() {
-//   var customLabels = document.getElementById('custom-labels').value //apple, orange
-//   console.log(customLabels)
-//   var filePath = document.getElementById('file_path').value //C:\fakepath\me.png
-//   var file = document.getElementById('file_path').files[0]
-//   document.getElementById('file_path').value = ""
-//   if ((filePath == "") || (!['png', 'jpg', 'jpeg'].includes(fileExt))) {
-//     alert("Please upload a valid PNG/JPG file")
-//   } else {
-//     let config = {
-//       headers: {
-//         'Content-Type': file.type,
-//         'x-api-key': 'MxJvWb9Rlf3gkMM4aJkRXa4YLnRAY0MU52BuFexS',
-//         'x-amz-meta-customLabels': customLabels,
-//       }
-//     };
-
-//     url = 'https://9aunc0hosc.execute-api.us-east-1.amazonaws.com/dev/upload/photophotobucket/' + file.name
-//     axios.put(url, file, config)
-//       .then(result => {
-//         console.log("DEBUG: not error result")
-//         console.log(result)
-//         alert("Successfully uploaded the image!")
-//       })
-//       .catch(error => {
-//         console.log("DEBUG: error result")
-//         console.log(error)
-//         alert("Something went Wrong!")
-//       })
-//   }
-// }
 
 
 function TextSearch() {
