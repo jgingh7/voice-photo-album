@@ -34,11 +34,11 @@
 <body>
   <div class="container">
     <div id='upload' class='upload_picture'>
-      <p>Upload your picture to the album!</p>
+      <h2>Upload your picture to the album!</h2>
       <input type="file" class='choose_file' onchange="ViewFile(this);" accept="image/*" id='file_path'
-        name='upload_file'>
-      <p>Type any custom labels you want to add to the image file.</p>
-      <input id='custom-labels' class='choose-file' type='text' placeholder="ex. apple, orange"></input><br><br>
+        name='upload_file'><br>
+      <p>Type in any custom labels you want to add to the image file divided by comma.</p>
+      <input id='custom-labels' class='choose-file' type='text' placeholder="ex. apple, orange, fruit"></input><br><br>
       <button class='upload_button' onclick="UploadFile()">Upload!</button><br>
     </div>
   </div>
@@ -47,7 +47,7 @@
     <br><br>
     <hr>
     <div id='search' class='search_picture'>
-      <p>Find your pictures using text or voice!! (you may search up to 5 terms)</p>
+      <h2>Find your pictures using text or voice!! (you may search up to 5 terms)</h2>
       <input id='searcher' class='choose-file' type='text' placeholder="Search"></input><br><br>
       <button class='search_button_text' onclick=TextSearch()>Text to search</button><br><br>
     </div>

@@ -8,6 +8,7 @@ from requests_aws4auth import AWS4Auth
 
 
 rek_client = boto3.client('rekognition')
+s3_client = boto3.client('s3')
 
 credentials = boto3.Session().get_credentials()
 region = 'us-east-1'
@@ -23,6 +24,17 @@ def lambda_handler(event, context):
     bucket_name = s3_info['bucket']['name'] #photophotobucket
     key_name = s3_info['object']['key'] #jin-profile.png
     
+
+    s3_response = s3_client.head_object(
+        Bucket = bucket_name,
+        Key = key_name
+    )
+    print('DEBUG: s3_response:', s3_response)
+    custom_label = s3_response['Metadata']['customlabels']
+    custom_label_list = custom_label.split(",")
+    custom_label_list = map(lambda x: x.strip(), custom_label_list)
+
+    
     pass_object = {
         'S3Object': {
             'Bucket':bucket_name,
@@ -37,6 +49,7 @@ def lambda_handler(event, context):
     labels = []
     for i in range(len(response['Labels'])):
         labels.append(response['Labels'][i]['Name'])
+    labels += custom_label_list
     
     
     # LABELS: ['Face', 'Person', 'Human', 'Hair', 'Shirt', 'Clothing', 'Apparel']

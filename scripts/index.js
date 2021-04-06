@@ -67,9 +67,9 @@ function TextSearch() {
 
 function VoiceSearch() {
   var searchTerm = document.getElementById("transcript").value.trim().toLowerCase()
-  console.log("DEBUG searchTerm:", searchTerm) //string of what I typed in
+  console.log("DEBUG searchTerm:", searchTerm)
   if (searchTerm == "") {
-    alert("Please enter valid text");
+    alert("Did you say something?");
   } else {
     $('#answer2').html("You are searching for: " + searchTerm).css("color", "green")
     document.getElementById('transcript').value = searchTerm // putting the trim lowercase in the value
@@ -78,7 +78,7 @@ function VoiceSearch() {
 }
 
 function SendMessageBot(searchTerm) {
-  document.getElementById('output-box').innerHTML = "" //need to see what to do with this // this is where the output pops up
+  document.getElementById('output-box').innerHTML = "" // this is where the images pops up
   var searchResults = []
   var params = {
     'q': searchTerm
