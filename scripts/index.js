@@ -92,6 +92,7 @@ function SendMessageBot(searchTerm) {
 
   return apigClient.searchGet(params, body, additionalParams)
     .then(function (result) {
+      document.getElementById('answer6').innerHTML = ""
       var responsedata = result.data.results.keywords.join(', ')
       $('#answer5').html("The main keywords are: " + responsedata).css("color", "blue")
 

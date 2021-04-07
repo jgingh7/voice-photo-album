@@ -30,9 +30,12 @@ def lambda_handler(event, context):
         Key = key_name
     )
     print('DEBUG: s3_response:', s3_response)
-    custom_label = s3_response['Metadata']['customlabels']
-    custom_label_list = custom_label.split(",")
-    custom_label_list = map(lambda x: x.strip(), custom_label_list)
+    try:
+        custom_label = s3_response['Metadata']['customlabels']
+        custom_label_list = custom_label.split(",")
+        custom_label_list = map(lambda x: x.strip(), custom_label_list)
+    except:
+        custom_label_list = []
 
     
     pass_object = {
