@@ -1,8 +1,5 @@
 import json
 import boto3
-from botocore.vendored import requests
-import time
-import requests
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
