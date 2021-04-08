@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  ElasticSearchCluster:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS:
+            - arn:aws:iam::380014966022:role/service-role/index-photos-role-nqh7mpex
+            - arn:aws:iam::380014966022:role/service-role/search-photos-role-s1ht3ej3
+          Action: 'es:*'
+          Resource: 'arn:aws:es:us-east-1:380014966022:domain/images/*'
+      DomainEndpointOptions: 
+        EnforceHTTPS: true
+      DomainName: 'images'
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: gp2
+      ElasticsearchClusterConfig:
+        InstanceType: 't3.small.elasticsearch'
+      ElasticsearchVersion: '7.9'
+      EncryptionAtRestOptions: 
+        Enabled: true
+        KmsKeyId: '630a1221-d429-4e9b-92a7-100066f5d896'
+      NodeToNodeEncryptionOptions:
+        Enabled: true
