@@ -12,4 +12,4 @@ using text or with voice.
 
 ## Architecture Diagram
 
-![image](https://user-images.githubusercontent.com/60978943/111003335-ebb60c00-8354-11eb-993c-9b37bbeca513.png)
+![image](https://user-images.githubusercontent.com/60978943/114810991-3a532d80-9d7b-11eb-9cd5-6bae29008592.png)
