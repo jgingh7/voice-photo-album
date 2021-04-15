@@ -2,7 +2,7 @@
 
 [Click here to access the app](https://d1q0j98gbvacnd.cloudfront.net/).
 
-## The chatbot concierge
+## The voice photo album
 
 You can upload images,
 
